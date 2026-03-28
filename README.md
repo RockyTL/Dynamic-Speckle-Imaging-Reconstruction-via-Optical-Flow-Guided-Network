@@ -6,7 +6,7 @@ This repository implements an optical-flow-guided dynamic speckle imaging recons
 
 The method combines motion estimation and image reconstruction to improve temporal consistency and reconstruction quality for dynamic scenes.
 
-本项目实现了一种基于光流引导的动态散斑成像重建方法，用于动态目标在散斑成像条件下的重建。
+本项目实现了一种基于光流引导的运动散斑成像重建方法，用于运动目标在散斑成像条件下的重建。
 
 该方法结合运动估计与图像重建，以提高动态场景中的时间一致性与重建质量。
 
@@ -16,13 +16,11 @@ The method combines motion estimation and image reconstruction to improve tempor
 
 The framework mainly consists of the following modules:
 
-* **Motion Encoder**: extracts motion-sensitive latent features from speckle sequences
 * **RAFT Optical Flow Module**: estimates forward and backward optical flow
 * **U-Net Reconstruction Network**: reconstructs object images
 
 该框架主要包含以下模块：
 
-* **Motion Encoder**：提取散斑序列中的运动敏感特征
 * **RAFT 光流模块**：估计前向与后向光流
 * **U-Net 重建网络**：完成目标图像重建
 
@@ -116,7 +114,7 @@ Testing outputs include:
 
 测试输出包括：
 
-* 前向 / 后向光流可视化
+* 前向 / 反向光流可视化
 * 重建目标图像
 * Ground truth 对比
 * 差异图
@@ -133,7 +131,7 @@ Testing outputs include:
 说明：
 
 * RAFT 模块用于光流估计
-* 可通过 `MOD.py` 生成仿真数据
+* 可通过 `MOD.py` 生成卷积仿真数据
 * 杂项功能存放于 `utils/` 文件夹
 
 ---
@@ -146,4 +144,4 @@ If you use this code, please cite:
 
 (Optics Express, First Author)
 
-如果使用本代码，请引用对应论文。
+如果使用本代码，请研究对应论文。
