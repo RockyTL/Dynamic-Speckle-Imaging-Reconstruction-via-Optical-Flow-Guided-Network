@@ -4,25 +4,29 @@
 
 This repository implements an optical-flow-guided dynamic speckle imaging reconstruction framework for dynamic object recovery under speckle imaging conditions.
 
-The method combines motion estimation and image reconstruction to improve temporal consistency and reconstruction quality for dynamic scenes.
+The method combines motion estimation and image reconstruction to improve temporal consistency and reconstruction quality for dynamic scenes, with potential applications in optical imaging, remote sensing, and medical imaging.
 
-本项目实现了一种基于光流引导的运动散斑成像重建方法，用于运动目标在散斑成像条件下的重建。
+本项目实现了一种基于光流引导的动态散斑成像重建方法，用于运动目标在散斑成像条件下的高质量重建。
 
-该方法结合运动估计与图像重建，以提高动态场景中的时间一致性与重建质量。
+该方法结合运动估计与图像重建技术，在动态场景下提升时间一致性与空间重建质量，可应用于光学成像、遥感探测、医学影像以及动态目标观测等领域。
 
 ---
 
 ## Method Overview / 方法概述
 
-The framework mainly consists of the following modules:
+The framework mainly consists of the following core modules:
 
-* **RAFT Optical Flow Module**: estimates forward and backward optical flow
-* **U-Net Reconstruction Network**: reconstructs object images
+* **RAFT Optical Flow Module**: Estimates forward and backward optical flow between consecutive speckle frames, providing accurate motion cues for temporal constraint.
+* **U-Net Reconstruction Network**: Adopts encoder-decoder structure with skip connections to reconstruct high-fidelity object images from speckle frames.
+* **Multi-Loss Fusion Module**: Integrates reconstruction loss, flow consistency loss, and temporal stability loss to balance multiple optimization targets.
+* **Dynamic Data Simulation Module**: Generates controllable synthetic datasets for model training and validation.
 
-该框架主要包含以下模块：
+该框架主要包含以下核心模块：
 
-* **RAFT 光流模块**：估计前向与后向光流
-* **U-Net 重建网络**：完成目标图像重建
+* **RAFT 光流模块**：估计连续散斑帧之间的前向/后向光流，为时序约束提供精确运动信息。
+* **U-Net 重建网络**：采用带跳跃连接的编码器-解码器结构，从散斑图像中恢复目标图像。
+* **多损失融合模块**：联合优化重建误差、光流一致性误差及时间稳定性误差。
+* **动态数据仿真模块**：生成可控动态散斑数据集，用于训练、验证与测试。
 
 ---
 
@@ -30,118 +34,248 @@ The framework mainly consists of the following modules:
 
 ```text
 project/
-├── Main.py                  # training / testing pipeline
-├── Net.py                   # main reconstruction network
-├── Net_Unet.py              # U-Net backbone
-├── MOD.py                   # simulation data generation
-├── Dataset.py               # dataset loading
-├── RAFT/                    # RAFT optical flow related modules
+├── Main.py                  # Core entry (training/testing pipeline, mode switch)
+├── Net.py                   # Main network (combines optical flow and reconstruction modules)
+├── Net_Unet.py              # U-Net backbone (encoder-decoder with skip connections)
+├── MOD.py                   # Synthetic data generation (speckle simulation + motion modeling)
+├── Dataset.py               # Dataset loader (preprocessing, sampling, augmentation)
+├── Mainloss_manage.py       # Loss management (multi-loss fusion, weighting)
+├── RAFT/                    # Optical flow dependency (RAFT-related modules)
 ├── utils/
-│   ├── Sundries.py          # loss functions and evaluation metrics
-│   ├── Visual_utils.py      # visualization tools
-│   ├── Mainloss_manage.py   # training loss management
-│   └── ...
+│   ├── Sundries.py          # Loss functions & evaluation metrics
+│   ├── Visual_utils.py      # Visualization tools
+│   └── ...                  # Auxiliary functions
 └── README.md
 ```
 
 ---
 
+## Environment Requirements / 环境依赖
+
+### Required Versions
+
+```bash
+Python >= 3.8
+PyTorch >= 1.10.0
+torchvision >= 0.11.0
+numpy >= 1.21.0
+matplotlib >= 3.4.0
+opencv-python >= 4.5.0
+scipy >= 1.7.0
+tqdm >= 4.62.0
+pillow >= 8.3.0
+pandas >= 1.3.0
+```
+
+### Installation Command
+
+```bash
+pip install torch torchvision numpy matplotlib opencv-python scipy tqdm pillow pandas
+```
+
+If RAFT requires additional dependencies:
+
+```bash
+cd RAFT
+pip install -r requirements.txt
+```
+
+如 RAFT 子模块包含额外依赖，请进入 RAFT 文件夹单独安装。
+
+---
+
+## Data Preparation / 数据准备
+
+### 1. Synthetic Data Generation / 合成数据生成（推荐）
+
+```bash
+python MOD.py
+```
+
+Key configurable parameters in `MOD.py`:
+
+* `object_size`: target object resolution
+* `bg_size`: background resolution
+* `move_range`: motion range
+* `num_frames`: frames per sequence
+* `train_size / test_size / val_size`: dataset scale
+* `save_path`: output path
+
+主要可调参数包括：
+
+* 目标尺寸
+* 背景尺寸
+* 运动范围
+* 序列帧数
+* 训练/测试/验证样本数量
+* 数据保存路径
+
+---
+
+### 2. Real Dataset Adaptation / 真实数据适配
+
+```text
+real_data/
+├── train/
+│   ├── speckle/
+│   ├── object/
+│   └── flow/
+└── test/
+```
+
+For real data:
+
+* Modify `Dataset.py`
+* Keep normalization consistent with synthetic data
+
+真实数据使用时需：
+
+* 修改 `Dataset.py` 中的数据读取路径
+* 保持与仿真数据一致的归一化方式
+
+---
+
 ## Training and Testing / 训练与测试
 
-Run:
+### Training / 训练
 
 ```bash
 python Main.py
 ```
 
-Please manually switch the running mode inside `Main.py`:
+Enable:
 
 ```python
 train_model(...)
-test_model(...)
 ```
 
-在 `Main.py` 中手动切换：
+---
+
+### Testing / 测试
+
+```bash
+python Main.py
+```
+
+Enable:
 
 ```python
-train_model(...)
 test_model(...)
 ```
 
 ---
 
-## Loss Functions / 损失函数设计
+### Quick Mode Switch / 快速模式切换
 
-Training loss includes:
+```python
+if __name__ == "__main__":
+    main()
 
-* Speckle warping loss
-* Object reconstruction loss
-* Temporal consistency loss
+    # test_model(...)
+```
 
-训练损失包括：
+建议在 `Main.py` 中手动切换训练与测试入口。
 
-* 散斑 warping loss
-* 目标重建 loss
-* 时间一致性 loss
+---
 
-Evaluation metrics include:
+## Loss Functions & Evaluation Metrics / 损失函数与评估指标
 
-* End-Point Error (EPE)
-* Angular Error
-* Flow Accuracy (1px / 3px / 5px)
-* SSIM
-* PSNR
+### Training Loss / 训练损失
 
-测试指标包括：
+```text
+L_total = L_recon + λ1 L_flow + λ2 L_temporal
+```
 
-* EPE（终点误差）
-* 角度误差
-* Flow Accuracy（1px / 3px / 5px）
-* SSIM
-* PSNR
+* `L_recon`: reconstruction loss
+* `L_flow`: flow estimation loss
+* `L_temporal`: temporal consistency loss
+
+---
+
+### Evaluation Metrics / 评估指标
+
+| Metric        | English Definition                                       | 中文说明   |
+| ------------- | -------------------------------------------------------- | ------ |
+| EPE           | Average Euclidean distance between predicted and GT flow | 光流终点误差 |
+| Angular Error | Angular difference of flow direction                     | 光流角度误差 |
+| Flow Accuracy | Ratio under 1px / 3px / 5px                              | 光流精度   |
+| SSIM          | Structural Similarity                                    | 结构相似性  |
+| PSNR          | Peak Signal-to-Noise Ratio                               | 峰值信噪比  |
+| MSE           | Mean Squared Error                                       | 均方误差   |
 
 ---
 
 ## Output Results / 输出结果
 
-Testing outputs include:
+```text
+results/
+├── checkpoints/
+├── flowdata/
+│   ├── flow_arrow_fw/
+│   ├── flow_colorimage_fw/
+│   └── gt_flow_*/
+├── origin_object/
+├── recon_object/
+├── diff_recon_vs_gt/
+├── overlay_results_*/
+├── test_metrics_summary.txt
+└── test_batch_losses.csv
+```
 
-* Forward / backward optical flow visualization
-* Reconstructed object frames
-* Ground truth comparison
-* Difference maps
-* Metric logs
+测试结果默认保存在 `save_dir` 下，包括：
 
-测试输出包括：
-
-* 前向 / 反向光流可视化
-* 重建目标图像
-* Ground truth 对比
+* 光流可视化结果
+* 重建图像
+* Ground Truth 对比
 * 差异图
-* 指标日志
+* 定量指标日志
 
 ---
 
-## Notes / 说明
+## Key Notes / 核心说明
 
-* RAFT module is used for optical flow estimation.
-* Simulation data can be generated using `MOD.py`.
-* Additional utility functions are stored in `utils/`.
+* RAFT folder should remain in project root
+* GPU is strongly recommended
+* Supports finetuning for real data
+* Data augmentation is integrated
 
-说明：
+核心说明：
 
-* RAFT 模块用于光流估计
-* 可通过 `MOD.py` 生成卷积仿真数据
-* 杂项功能存放于 `utils/` 文件夹
+* RAFT 文件夹建议保持在项目根目录
+* 推荐使用 GPU 加速训练
+* 支持真实数据微调
+* 已集成基础数据增强策略
+
+---
+
+## Common Issues / 常见问题
+
+| Issue              | Solution                      |
+| ------------------ | ----------------------------- |
+| RAFT import error  | install RAFT dependencies     |
+| Out of Memory      | reduce batch size             |
+| Low SSIM           | increase epochs / adjust loss |
+| Flow error         | use pretrained RAFT           |
+| Real data mismatch | modify Dataset.py             |
 
 ---
 
 ## Citation / 引用
 
-If you use this code, please cite:
+If you use this code in your research, please cite:
 
-**Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network**
+Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network  
+Optics Express  
+DOI: https://doi.org/10.1364/OE.591608
 
-(Optics Express, First Author)
+```bibtex
+@article{speckle_flow_guided_2025,
+  title={Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network},
+  journal={Optics Express},
+  doi={10.1364/OE.591608}
+}
+```
 
-如果使用本代码，请研究对应论文。
+如在研究中使用本代码，请引用对应论文。
+
+
