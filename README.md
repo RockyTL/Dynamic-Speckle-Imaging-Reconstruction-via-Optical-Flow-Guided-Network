@@ -70,7 +70,7 @@ pandas >= 1.3.0
 ### Installation Command
 
 ```bash
-pip install torch torchvision numpy matplotlib opencv-python scipy tqdm pillow pandas
+pip install -r requirements.txt
 ```
 
 If RAFT requires additional dependencies:
