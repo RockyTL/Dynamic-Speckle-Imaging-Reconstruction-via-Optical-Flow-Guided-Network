@@ -1,12 +1,14 @@
 # Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network
 
+[![DOI](https://img.shields.io/badge/DOI-10.1364/OE.591608-blue)](https://doi.org/10.1364/OE.591608)
+
 ## Introduction / 项目简介
 
 This repository implements an optical-flow-guided dynamic speckle imaging reconstruction framework for dynamic object recovery under speckle imaging conditions.
 
 The method combines motion estimation and image reconstruction to improve temporal consistency and reconstruction quality for dynamic scenes, with potential applications in optical imaging, remote sensing, and medical imaging.
 
-本项目实现了一种基于光流引导的动态散斑成像重建方法，用于运动目标在散斑成像条件下的高质量重建。
+本项目实现了一种基于光流引导的运动散斑成像重建方法，用于运动目标在散斑成像条件下的高质量重建。
 
 该方法结合运动估计与图像重建技术，在动态场景下提升时间一致性与空间重建质量，可应用于光学成像、遥感探测、医学影像以及动态目标观测等领域。
 
@@ -176,8 +178,7 @@ test_model(...)
 ```python
 if __name__ == "__main__":
     main()
-
-    # test_model(...)
+    #......
 ```
 
 建议在 `Main.py` 中手动切换训练与测试入口。
@@ -271,17 +272,24 @@ results/
 If you use this code in your research, please cite:
 
 Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network  
-Optics Express  
+Optics Express, Vol. 34, No. 8, pp. 14534–14548 (2026)  
 DOI: https://doi.org/10.1364/OE.591608
 
+如果本项目对您的研究有帮助，请引用以下论文：
+
+《Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network》
+
+期刊：Optics Express，2026 年，第 34 卷，第 8 期，14534–14548 页
+
 ```bibtex
-@article{speckle_flow_guided_2025,
-  title={Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network},
-  journal={Optics Express},
-  doi={10.1364/OE.591608}
+@article{speckle_flow_guided_2026,
+  title   = {Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network},
+  journal = {Optics Express},
+  volume  = {34}, number = {8},
+  pages   = {14534--14548},
+  year    = {2026},
+  doi     = {10.1364/OE.591608}
 }
 ```
-
-如在研究中使用本代码，请引用对应论文。
 
 
