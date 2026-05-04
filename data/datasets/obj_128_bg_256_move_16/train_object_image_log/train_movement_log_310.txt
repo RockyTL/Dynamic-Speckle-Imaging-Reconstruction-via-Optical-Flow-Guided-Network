@@ -1,0 +1,7 @@
+Object 310 Movement Log
+Initial position: (-13, 17)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (-11, 11), Total Shift (-11, 11)
+Frame 2: Shift (-1, -14), Total Shift (-12, -3)
+Frame 3: Shift (-1, -3), Total Shift (-13, -6)
+Frame 4: Shift (-5, -7), Total Shift (-18, -13)

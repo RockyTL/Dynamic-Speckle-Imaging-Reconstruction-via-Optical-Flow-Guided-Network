@@ -1,0 +1,7 @@
+Object 507 Movement Log
+Initial position: (37, -15)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (-12, -3), Total Shift (-12, -3)
+Frame 2: Shift (-3, 1), Total Shift (-15, -2)
+Frame 3: Shift (2, 3), Total Shift (-13, 1)
+Frame 4: Shift (12, -9), Total Shift (-1, -8)

@@ -1,0 +1,7 @@
+Object 423 Movement Log
+Initial position: (17, -15)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (-7, -10), Total Shift (-7, -10)
+Frame 2: Shift (-14, -11), Total Shift (-21, -21)
+Frame 3: Shift (16, 10), Total Shift (-5, -11)
+Frame 4: Shift (-14, -1), Total Shift (-19, -12)

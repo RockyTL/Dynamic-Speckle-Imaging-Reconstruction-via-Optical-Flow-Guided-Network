@@ -1,0 +1,7 @@
+Object 405 Movement Log
+Initial position: (-5, -63)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (2, 12), Total Shift (2, 12)
+Frame 2: Shift (0, 14), Total Shift (2, 26)
+Frame 3: Shift (-14, -10), Total Shift (-12, 16)
+Frame 4: Shift (-15, -2), Total Shift (-27, 14)

@@ -1,0 +1,46 @@
+# Training configuration for Dynamic Speckle Imaging Reconstruction
+# All paths, hyperparameters, and model settings in one place.
+
+# ---- Data ----
+data:
+  base_path: "data/datasets"
+  pos: "obj_128_bg_256_move_16"
+  num_frames: 5
+  num_workers: 12
+
+# ---- Model ----
+model:
+  raft:
+    small: true
+    dropout: 0
+    alternate_corr: false
+    mixed_precision: false
+    corr_levels: 4
+    corr_radius: 4
+
+# ---- Training ----
+training:
+  num_epochs: 50
+  learning_rate:
+    flow_model: 1.0e-4
+    object_reconstructor: 1.0e-4
+  save_dir: "data/results"
+
+# ---- Fine-tuning ----
+finetune:
+  num_epochs: 150
+  learning_rate:
+    flow_model: 1.0e-6
+    object_reconstructor: 1.0e-5
+  save_dir: "data/finetune_results"
+  pretrained_checkpoint: "data/results/checkpoints/checkpoint_epoch_50.pth"
+
+# ---- U-Net only mode ----
+unet_only:
+  num_epochs: 50
+  learning_rate: 1.0e-4
+  save_dir: "data/results_onlyunet"
+
+# ---- Validation ----
+validation:
+  enabled: true

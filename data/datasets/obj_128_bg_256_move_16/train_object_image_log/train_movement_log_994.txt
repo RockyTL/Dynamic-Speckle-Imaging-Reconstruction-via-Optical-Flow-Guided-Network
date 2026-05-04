@@ -1,0 +1,7 @@
+Object 994 Movement Log
+Initial position: (-46, -6)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (12, 14), Total Shift (12, 14)
+Frame 2: Shift (-4, -16), Total Shift (8, -2)
+Frame 3: Shift (3, 0), Total Shift (11, -2)
+Frame 4: Shift (12, 16), Total Shift (23, 14)

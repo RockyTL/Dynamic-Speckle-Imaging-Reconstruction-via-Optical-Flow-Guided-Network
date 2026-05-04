@@ -8,25 +8,23 @@ This repository implements an optical-flow-guided dynamic speckle imaging recons
 
 The method combines motion estimation and image reconstruction to improve temporal consistency and reconstruction quality for dynamic scenes, with potential applications in optical imaging, remote sensing, and medical imaging.
 
-本项目实现了一种基于光流引导的运动散斑成像重建方法，用于运动目标在散斑成像条件下的高质量重建。
-
-该方法结合运动估计与图像重建技术，在动态场景下提升时间一致性与空间重建质量，可应用于光学成像、遥感探测、医学影像以及动态目标观测等领域。
+本项目实现了一种基于光流引导的运动散斑成像重建方法，用于运动目标在散斑成像条件下的高质量重建。该方法结合运动估计与图像重建技术，在动态场景下提升时间一致性与空间重建质量，可应用于光学成像、遥感探测、医学影像以及动态目标观测等领域。
 
 ---
 
 ## Method Overview / 方法概述
 
-The framework mainly consists of the following core modules:
+The framework consists of the following core modules:
 
 * **RAFT Optical Flow Module**: Estimates forward and backward optical flow between consecutive speckle frames, providing accurate motion cues for temporal constraint.
-* **U-Net Reconstruction Network**: Adopts encoder-decoder structure with skip connections to reconstruct high-fidelity object images from speckle frames.
+* **U-Net Reconstruction Network**: Encoder-decoder structure with SE attention and skip connections to reconstruct high-fidelity object images from speckle frames.
 * **Multi-Loss Fusion Module**: Integrates reconstruction loss, flow consistency loss, and temporal stability loss to balance multiple optimization targets.
 * **Dynamic Data Simulation Module**: Generates controllable synthetic datasets for model training and validation.
 
 该框架主要包含以下核心模块：
 
 * **RAFT 光流模块**：估计连续散斑帧之间的前向/后向光流，为时序约束提供精确运动信息。
-* **U-Net 重建网络**：采用带跳跃连接的编码器-解码器结构，从散斑图像中恢复目标图像。
+* **U-Net 重建网络**：采用带SE注意力与跳跃连接的编码器-解码器结构，从散斑图像中恢复目标图像。
 * **多损失融合模块**：联合优化重建误差、光流一致性误差及时间稳定性误差。
 * **动态数据仿真模块**：生成可控动态散斑数据集，用于训练、验证与测试。
 
@@ -40,19 +38,34 @@ The framework mainly consists of the following core modules:
 
 ## Project Structure / 项目结构
 
-```text
+```
 project/
-├── Main.py                  # Core entry (training/testing pipeline, mode switch)
-├── Net.py                   # Main network (combines optical flow and reconstruction modules)
-├── Net_Unet.py              # U-Net backbone (encoder-decoder with skip connections)
-├── MOD.py                   # Synthetic data generation (speckle simulation + motion modeling)
-├── Dataset.py               # Dataset loader (preprocessing, sampling, augmentation)
-├── Mainloss_manage.py       # Loss management (multi-loss fusion, weighting)
-├── RAFT/                    # Optical flow dependency (RAFT-related modules)
-├── utils/
-│   ├── Sundries.py          # Loss functions & evaluation metrics
-│   ├── Visual_utils.py      # Visualization tools
-│   └── ...                  # Auxiliary functions
+├── configs/
+│   ├── train.yaml              # Training hyperparameters and paths
+│   └── test.yaml               # Testing parameters and paths
+├── src/
+│   ├── models/
+│   │   ├── complete_model.py   # CompleteModel, SimpleReconstructionModel
+│   │   ├── unet.py             # U-Net with SE attention blocks
+│   │   └── motion.py           # MotionEncoder, MotionAdapter, GlobalMotionHead (experimental)
+│   ├── data/
+│   │   └── datasets.py         # Dataset classes for synthetic and experimental data
+│   ├── losses/
+│   │   └── combined_loss.py    # CombinedLoss, SimpleLoss, warp, flow utilities, metrics
+│   ├── engine/
+│   │   ├── trainer.py          # Training and fine-tuning loops
+│   │   └── evaluator.py        # Model evaluation functions
+│   └── utils/
+│       ├── visualization.py    # Flow rendering, overlays, result saving
+│       ├── metrics.py          # CSV logging, table formatting
+│       └── io_utils.py         # File I/O, directory creation, checkpoint scanning
+├── scripts/
+│   ├── train.py                # Training entry point
+│   ├── test.py                 # Testing entry point
+│   └── run_checkpoints.py      # Batch checkpoint evaluation
+├── RAFT/                       # Third-party optical flow module (unchanged)
+├── MOD.py                      # Synthetic data generation
+├── requirements.txt
 └── README.md
 ```
 
@@ -60,166 +73,144 @@ project/
 
 ## Environment Requirements / 环境依赖
 
-### Required Versions
+- Python >= 3.8
+- PyTorch >= 1.10.0
+- torchvision >= 0.11.0
 
-```bash
-Python >= 3.8
-PyTorch >= 1.10.0
-torchvision >= 0.11.0
-numpy >= 1.21.0
-matplotlib >= 3.4.0
-opencv-python >= 4.5.0
-scipy >= 1.7.0
-tqdm >= 4.62.0
-pillow >= 8.3.0
-pandas >= 1.3.0
-```
-
-### Installation Command
+### Installation
 
 ```bash
 pip install -r requirements.txt
 ```
-
-If RAFT requires additional dependencies:
-
-```bash
-cd RAFT
-pip install -r requirements.txt
-```
-
-如 RAFT 子模块包含额外依赖，请进入 RAFT 文件夹单独安装。
 
 ---
 
 ## Data Preparation / 数据准备
 
-### 1. Synthetic Data Generation / 合成数据生成（推荐）
+### 1. Synthetic Data Generation / 合成数据生成
 
 ```bash
 python MOD.py
 ```
 
 Key configurable parameters in `MOD.py`:
+- `train_size / val_size / test_size`: dataset scale
+- `num_frames`: frames per sequence
+- `obj_size`, `bg_size`, `move_range`: object/background/motion settings
+- `base_path`: output directory
 
-* `object_size`: target object resolution
-* `bg_size`: background resolution
-* `move_range`: motion range
-* `num_frames`: frames per sequence
-* `train_size / test_size / val_size`: dataset scale
-* `save_path`: output path
+### 2. Expected Dataset Directory Structure / 数据集目录结构
 
-主要可调参数包括：
-
-* 目标尺寸
-* 背景尺寸
-* 运动范围
-* 序列帧数
-* 训练/测试/验证样本数量
-* 数据保存路径
-
----
-
-### 2. Real Dataset Adaptation / 真实数据适配
-
-```text
-real_data/
-├── train/
-│   ├── speckle/
-│   ├── object/
-│   └── flow/
-└── test/
+```
+data/datasets/obj_128_bg_256_move_16/
+├── train_speckle_images/
+├── train_object_images/
+├── train_flow/
+├── val_speckle_images/
+├── val_object_images/
+├── val_flow/
+├── test_speckle_images/
+├── test_object_images/
+└── test_flow/
 ```
 
-For real data:
+### 3. Real Experimental Data / 真实实验数据
 
-* Modify `Dataset.py`
-* Keep normalization consistent with synthetic data
-
-真实数据使用时需：
-
-* 修改 `Dataset.py` 中的数据读取路径
-* 保持与仿真数据一致的归一化方式
+Organize `.bmp` speckle images in a flat directory named as `Image{N}_frame{M}.bmp`.
 
 ---
 
-## Training and Testing / 训练与测试
+## Training / 训练
 
-### Training / 训练
+### Full Model (RAFT + U-Net)
 
 ```bash
-python Main.py
+python scripts/train.py --config configs/train.yaml
 ```
 
-Enable:
-
-```python
-train_model(...)
-```
-
----
-
-### Testing / 测试
+### U-Net Only (Ablation)
 
 ```bash
-python Main.py
+python scripts/train.py --config configs/train.yaml --mode unet_only
 ```
 
-Enable:
+### Fine-Tuning on Experimental Data
 
-```python
-test_model(...)
+```bash
+python scripts/train.py --config configs/train.yaml --mode finetune
+```
+
+### Resume from Checkpoint
+
+```bash
+python scripts/train.py --config configs/train.yaml --resume checkpoints/best_model.pth
 ```
 
 ---
 
-### Quick Mode Switch / 快速模式切换
+## Testing / 测试
 
-```python
-if __name__ == "__main__":
-    main()
-    #......
+### Synthetic Data
+
+```bash
+python scripts/test.py --config configs/test.yaml --checkpoint path/to/model.pth
 ```
 
-建议在 `Main.py` 中手动切换训练与测试入口。
+### Experimental Data (no GT)
+
+```bash
+python scripts/test.py --config configs/test.yaml --mode experiment
+```
+
+### Experimental Data (with GT)
+
+```bash
+python scripts/test.py --config configs/test.yaml --mode experiment_withobj
+```
+
+### Batch Checkpoint Evaluation
+
+```bash
+python scripts/run_checkpoints.py --config configs/test.yaml
+python scripts/run_checkpoints.py --config configs/test.yaml --mode experiment --start_epoch 15 --end_epoch 25
+```
 
 ---
 
 ## Loss Functions & Evaluation Metrics / 损失函数与评估指标
 
-### Training Loss / 训练损失
+### Training Loss
 
-```text
-L_total = L_recon + λ1 L_flow + λ2 L_temporal
+```
+L_total = L_recon + L_warp + L_temporal
 ```
 
-* `L_recon`: reconstruction loss
-* `L_flow`: flow estimation loss
-* `L_temporal`: temporal consistency loss
+- `L_recon`: Charbonnier + MSE reconstruction loss
+- `L_warp`: speckle warp consistency loss (forward + backward)
+- `L_temporal`: object warp chain loss across time
 
----
+### Evaluation Metrics
 
-### Evaluation Metrics / 评估指标
-
-| Metric        | English Definition                                       | 中文说明   |
-| ------------- | -------------------------------------------------------- | ------ |
-| EPE           | Average Euclidean distance between predicted and GT flow | 光流终点误差 |
-| Angular Error | Angular difference of flow direction                     | 光流角度误差 |
-| Flow Accuracy | Ratio under 1px / 3px / 5px                              | 光流精度   |
-| SSIM          | Structural Similarity                                    | 结构相似性  |
-| PSNR          | Peak Signal-to-Noise Ratio                               | 峰值信噪比  |
-| MSE           | Mean Squared Error                                       | 均方误差   |
+| Metric        | Definition                              |
+| ------------- | --------------------------------------- |
+| EPE           | Endpoint Error (average L2 distance)    |
+| Angular Error | Flow direction angular difference       |
+| Fl-all        | KITTI outlier ratio                     |
+| N-px Accuracy | Ratio of pixels with EPE < N pixels     |
+| SSIM          | Structural Similarity                   |
+| PSNR          | Peak Signal-to-Noise Ratio              |
+| MSE           | Mean Squared Error                      |
 
 ---
 
 ## Output Results / 输出结果
 
-```text
+```
 results/
 ├── checkpoints/
 ├── flowdata/
-│   ├── flow_arrow_fw/
-│   ├── flow_colorimage_fw/
+│   ├── flow_arrow_fw/     flow_colorimage_fw/
+│   ├── flow_arrow_bw/     flow_colorimage_bw/
 │   └── gt_flow_*/
 ├── origin_object/
 ├── recon_object/
@@ -229,41 +220,26 @@ results/
 └── test_batch_losses.csv
 ```
 
-测试结果默认保存在 `save_dir` 下，包括：
-
-* 光流可视化结果
-* 重建图像
-* Ground Truth 对比
-* 差异图
-* 定量指标日志
-
 ---
 
 ## Key Notes / 核心说明
 
-* RAFT folder should remain in project root
-* GPU is strongly recommended
-* Supports finetuning for real data
-* Data augmentation is integrated
-
-核心说明：
-
-* RAFT 文件夹建议保持在项目根目录
-* 推荐使用 GPU 加速训练
-* 支持真实数据微调
-* 已集成基础数据增强策略
+- RAFT folder should remain in project root — do not modify
+- GPU is strongly recommended
+- Supports fine-tuning for real experimental data
+- All configuration is centralized in `configs/*.yaml`
 
 ---
 
 ## Common Issues / 常见问题
 
-| Issue              | Solution                      |
-| ------------------ | ----------------------------- |
-| RAFT import error  | install RAFT dependencies     |
-| Out of Memory      | reduce batch size             |
-| Low SSIM           | increase epochs / adjust loss |
-| Flow error         | use pretrained RAFT           |
-| Real data mismatch | modify Dataset.py             |
+| Issue              | Solution                           |
+| ------------------ | ---------------------------------- |
+| RAFT import error  | Install RAFT dependencies          |
+| Out of Memory      | Reduce batch size / frame count    |
+| Low SSIM           | Increase epochs / adjust LR        |
+| Flow error         | Use pretrained RAFT weights        |
+| YAML parse error   | Check config file indentation      |
 
 ---
 
@@ -271,15 +247,9 @@ results/
 
 If you use this code in your research, please cite:
 
-Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network  
-Optics Express, Vol. 34, No. 8, pp. 14534–14548 (2026)  
+**Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network**  
+Optics Express, Vol. 34, No. 8, pp. 14534-14548 (2026)  
 DOI: https://doi.org/10.1364/OE.591608
-
-如果本项目对您的研究有帮助，请引用以下论文：
-
-《Dynamic Speckle Imaging Reconstruction via Optical-Flow-Guided Network》
-
-期刊：Optics Express，2026 年，第 34 卷，第 8 期，14534–14548 页
 
 ```bibtex
 @article{speckle_flow_guided_2026,
@@ -291,5 +261,3 @@ DOI: https://doi.org/10.1364/OE.591608
   doi     = {10.1364/OE.591608}
 }
 ```
-
-

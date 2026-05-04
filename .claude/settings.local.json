@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from src.models.unet import UNet, SELayer, DoubleConv; print\\('unet.py OK'\\)\")",
+      "Bash(python -c \"from src.models.motion import MotionEncoder, upsample_flow; print\\('motion.py OK'\\)\")",
+      "Bash(python -c \"from src.data.datasets import SpeckleDataset_New; print\\('datasets.py OK'\\)\")",
+      "Bash(python -m py_compile src/models/unet.py)",
+      "Bash(python -m py_compile src/models/motion.py)",
+      "Bash(python -m py_compile src/data/datasets.py)",
+      "Bash(python -m py_compile src/losses/combined_loss.py)",
+      "Bash(python -m py_compile src/models/complete_model.py)",
+      "Bash(where python *)"
+    ]
+  }
+}

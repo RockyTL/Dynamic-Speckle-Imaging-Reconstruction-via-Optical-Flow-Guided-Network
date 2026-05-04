@@ -1,0 +1,7 @@
+Object 600 Movement Log
+Initial position: (-49, 48)
+Frame 0: Shift (0, 0), Total Shift (0, 0)
+Frame 1: Shift (-9, 13), Total Shift (-9, 13)
+Frame 2: Shift (15, -7), Total Shift (6, 6)
+Frame 3: Shift (-14, 4), Total Shift (-8, 10)
+Frame 4: Shift (9, -14), Total Shift (1, -4)

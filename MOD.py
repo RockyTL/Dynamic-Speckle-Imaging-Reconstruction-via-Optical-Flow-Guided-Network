@@ -261,58 +261,20 @@ def generate_random_initial_position(obj_size, bg_size):
     return (init_y, init_x)
 
 
-# def generate_fixed_shifts_per_object(num_objects: int, num_frames: int, move_range: int) -> Dict[int, List[Tuple[int, int]]]:
-#     """为每个物体生成固定的移动序列，确保包含极限情况"""
-#     random.seed(42)  # 确保每次运行相同
-#     # 为每个物体生成移动序列
-#     object_shifts = {}
-#
-#     # 定义移动类型的分布
-#     # 10% 极限情况，10% 接近极限，80% 完全随机
-#     extreme_ratio = 0.1
-#     near_extreme_ratio = 0.1
-#
-#     for obj_idx in range(num_objects):
-#         shifts = []
-#         for frame in range(num_frames - 1):
-#             movement_type = random.random()  # 0-1之间的随机数
-#
-#             if movement_type < extreme_ratio:
-#                 # 极限情况：使用边界值或接近边界值
-#                 x_shift = random.choice([-move_range, move_range])
-#                 y_shift = random.choice([-move_range, move_range])
-#             elif movement_type < extreme_ratio + near_extreme_ratio:
-#                 # 接近极限的情况：使用接近边界的值
-#                 edge_range = int(move_range * 0.2)  # 边缘区域的范围，例如20%
-#                 x_sign = random.choice([-1, 1])
-#                 y_sign = random.choice([-1, 1])
-#                 x_shift = x_sign * random.randint(move_range - edge_range, move_range)
-#                 y_shift = y_sign * random.randint(move_range - edge_range, move_range)
-#             else:
-#                 # 普通随机情况
-#                 x_shift = random.randint(-move_range, move_range)
-#                 y_shift = random.randint(-move_range, move_range)
-#
-#             shifts.append((y_shift, x_shift))  # 注意：y轴对应的是垂直方向
-#
-#         object_shifts[obj_idx] = shifts
-#
-#     return object_shifts
-
 def generate_fixed_shifts_per_object(num_objects, num_frames, move_range, obj_size, bg_size):
     object_initial_positions = {}
     object_shifts = {}
-    half_range = (bg_size - obj_size) // 2  # = 64
+    half_range = (bg_size - obj_size) // 2
     for obj_idx in range(num_objects):
-        # ① 生成随机初始位置（保证物体不会出界）
+        # Generate random initial position ensuring object stays in bounds
         init_pos = generate_random_initial_position(obj_size, bg_size)
         object_initial_positions[obj_idx] = init_pos
-        # ② 生成移动序列
+        # Generate shift sequence with boundary constraint
         shifts = []
-        total_y, total_x = 0, 0  # 累积移动
+        total_y, total_x = 0, 0  # cumulative displacement
         for t in range(num_frames - 1):
             while True:
-                # 随机移动（你的三类策略依然可以放进来）
+                # Random shift (can include the three-class strategy if desired)
                 dy = random.randint(-move_range, move_range)
                 dx = random.randint(-move_range, move_range)
                 new_y = total_y + dy
@@ -320,7 +282,7 @@ def generate_fixed_shifts_per_object(num_objects, num_frames, move_range, obj_si
                 # 检查移动后是否越界
                 if (-half_range <= init_pos[0] + new_y <= half_range and
                         -half_range <= init_pos[1] + new_x <= half_range):
-                    # 合法 → 接受移动
+                    # Valid → accept the shift
                     total_y = new_y
                     total_x = new_x
                     shifts.append((dy, dx))
@@ -404,7 +366,7 @@ def main():
     # custom_train_dataset = CustomImageDataset('data/USAFdigits/')
     # # train_dataset, _ = torch.utils.data.random_split(custom_train_dataset,
     # #                                                  [train_size, len(custom_train_dataset) - train_size])
-    # # test_dataset = Subset(train_dataset.dataset, train_dataset.indices[:test_size])
+    # # test_dataset = Subset(train_dataset.datasets, train_dataset.indices[:test_size])
     # train_dataset = torch.utils.data.Subset(custom_train_dataset, list(range(train_size)))
     # test_dataset = torch.utils.data.Subset(custom_train_dataset, list(range(test_size)))
 
